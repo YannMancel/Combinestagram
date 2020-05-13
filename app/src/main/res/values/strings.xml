@@ -1,0 +1,12 @@
+
+<resources>
+    <string name="app_name">Combinestagram</string>
+
+    <!-- MainActivity.kt -->
+    <string name="collage">Collage</string>
+
+    <!-- activity_main.xml -->
+    <string name="add">ADD</string>
+    <string name="clear">CLEAR</string>
+    <string name="save">SAVE</string>
+</resources>
