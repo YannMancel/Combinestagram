@@ -75,4 +75,14 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <androidx.core.widget.ContentLoadingProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="@dimen/dp_64"
+        android:layout_height="@dimen/dp_64"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:visibility="gone"
+        tools:visibility="visible"
+        style="?android:attr/progressBarStyle"/>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

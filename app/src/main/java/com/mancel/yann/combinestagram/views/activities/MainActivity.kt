@@ -40,6 +40,7 @@ class MainActivity : BaseActivity() {
 
     override fun configureDesign() {
         this.configureSelectedPhotos()
+        this.configureThumbnailStatus()
         this.configureListenerOfEachButton()
     }
 
@@ -52,6 +53,15 @@ class MainActivity : BaseActivity() {
                 Observer { photos ->
                     photos?.let { this.updateUI(it) }
                 }
+            )
+    }
+
+    private fun configureThumbnailStatus() {
+        this._viewModel
+            .getThumbnailStatus()
+            .observe(
+                this@MainActivity,
+                Observer { this.configureThumbnailByStatus(it) }
             )
     }
 
@@ -68,8 +78,7 @@ class MainActivity : BaseActivity() {
     private fun actionAdd() {
         with(PhotosBottomDialogFragment.newInstance()) {
             show(this@MainActivity.supportFragmentManager, "bottom fragment")
-
-            this@MainActivity._viewModel.subscribeSelectedPhoto(this.selectedPhoto)
+            this@MainActivity._viewModel.subscribeSelectedPhoto(this)
         }
     }
 
@@ -80,8 +89,10 @@ class MainActivity : BaseActivity() {
                 imageView = this.collageImage,
                 context = this.applicationContext
             )
+            .doOnSubscribe { this.progressBar.show() }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
+            .doAfterTerminate { this.progressBar.hide() }
             .subscribeBy(
                 onSuccess = { fileName ->
                     MessageTools.showMessageWithSnackbar(
@@ -104,11 +115,9 @@ class MainActivity : BaseActivity() {
         this.configureVisibilityOfButton(photos)
         this.configureTitleOfActivity(photos)
         this.configureCollage(photos)
-        this.configureThumbnail(photos)
     }
 
     private fun configureVisibilityOfButton(photos: List<Photo>) {
-        this.addButton.isEnabled = (photos.size < 6)
         this.clearButton.isEnabled = photos.isNotEmpty()
         this.saveButton.isEnabled = photos.isNotEmpty() && (photos.size % 2 == 0)
     }
@@ -140,13 +149,17 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun configureThumbnail(photos: List<Photo>) {
-        if (photos.isNotEmpty()) {
-            val bitmap = BitmapFactory.decodeResource(this.resources, photos.last().drawable)
-            this.thumbnail.setImageDrawable(BitmapDrawable(this.resources, bitmap))
-        }
-        else {
-            this.thumbnail.setImageResource(android.R.color.transparent)
+    private fun configureThumbnailByStatus(status: SharedViewModel.ThumbnailStatus?) {
+        status?.let {
+            when (status) {
+                SharedViewModel.ThumbnailStatus.READY -> {
+                    this.thumbnail.setImageDrawable(this.collageImage.drawable)
+                }
+
+                SharedViewModel.ThumbnailStatus.ERROR -> {
+                    this.thumbnail.setImageResource(android.R.color.transparent)
+                }
+            }
         }
     }
 }
