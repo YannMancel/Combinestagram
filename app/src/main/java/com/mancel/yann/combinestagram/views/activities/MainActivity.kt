@@ -41,6 +41,7 @@ class MainActivity : BaseActivity() {
     override fun configureDesign() {
         this.configureSelectedPhotos()
         this.configureThumbnailStatus()
+        this.configureCollageStatus()
         this.configureListenerOfEachButton()
     }
 
@@ -62,6 +63,15 @@ class MainActivity : BaseActivity() {
             .observe(
                 this@MainActivity,
                 Observer { this.configureThumbnailByStatus(it) }
+            )
+    }
+
+    private fun configureCollageStatus() {
+        this._viewModel
+            .getCollageStatus()
+            .observe(
+                this@MainActivity,
+                Observer { this.configureCollageByStatus(it) }
             )
     }
 
@@ -151,13 +161,28 @@ class MainActivity : BaseActivity() {
 
     private fun configureThumbnailByStatus(status: SharedViewModel.ThumbnailStatus?) {
         status?.let {
-            when (status) {
+            when (it) {
                 SharedViewModel.ThumbnailStatus.READY -> {
                     this.thumbnail.setImageDrawable(this.collageImage.drawable)
                 }
 
                 SharedViewModel.ThumbnailStatus.ERROR -> {
                     this.thumbnail.setImageResource(android.R.color.transparent)
+                }
+            }
+        }
+    }
+
+    private fun configureCollageByStatus(status: SharedViewModel.CollageStatus?) {
+        status?.let {
+            when (it) {
+                SharedViewModel.CollageStatus.NOT_FULL -> { /* Do nothing here */ }
+
+                SharedViewModel.CollageStatus.FULL_FULLED -> {
+                    MessageTools.showMessageWithSnackbar(
+                        this.coordinator_layout,
+                        this.getString(R.string.photo_selection_impossible)
+                    )
                 }
             }
         }

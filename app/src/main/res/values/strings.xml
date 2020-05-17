@@ -4,6 +4,7 @@
 
     <!-- MainActivity.kt -->
     <string name="collage">Collage</string>
+    <string name="photo_selection_impossible">You can no longer select a photo</string>
 
     <!-- activity_main.xml -->
     <string name="add">ADD</string>

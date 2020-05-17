@@ -40,6 +40,14 @@ class SharedViewModel : ViewModel() {
     enum class ThumbnailStatus {READY, ERROR}
     private val _thumbnailStatus = MutableLiveData<ThumbnailStatus>()
 
+    enum class CollageStatus {NOT_FULL, FULL_FULLED}
+    private val _collageStatus = MutableLiveData<CollageStatus>()
+
+    companion object {
+        const val MAX_PHOTOS = 9
+        const val TIMEOUT_PHOTO = 250L
+    }
+
     // CONSTRUCTORS --------------------------------------------------------------------------------
 
     init {
@@ -63,6 +71,8 @@ class SharedViewModel : ViewModel() {
 
     fun getThumbnailStatus(): LiveData<ThumbnailStatus> = this._thumbnailStatus
 
+    fun getCollageStatus(): LiveData<CollageStatus> = this._collageStatus
+
     // -- Photo --
 
     private fun addPhoto(photo: Photo) {
@@ -81,6 +91,10 @@ class SharedViewModel : ViewModel() {
 
     // -- Single --
 
+    /**
+     * Creates a [Single] that saves the content of an [ImageView] in argument
+     * into the external storage
+     */
     fun saveBitmapFromImageView(
         imageView: ImageView,
         context: Context
@@ -114,11 +128,15 @@ class SharedViewModel : ViewModel() {
 
     // -- Observable --
 
+    /**
+     * Subscribes to a shared Observable
+     */
     fun subscribeSelectedPhoto(fragment: PhotosBottomDialogFragment) {
         val sharedObservable = fragment.selectedPhoto.share()
 
         sharedObservable
             .doOnComplete { Timber.d("Completed selecting photos") }
+            .takeWhile { this._imagesSubject.value?.size ?: 0 < MAX_PHOTOS }
             .filter { newPhoto ->
                 val bitmap = BitmapFactory.decodeResource(fragment.resources, newPhoto.drawable)
                 bitmap.width > bitmap.height
@@ -127,10 +145,16 @@ class SharedViewModel : ViewModel() {
                 val photos = this._imagesSubject.value ?: mutableListOf()
                 !photos.any { it.drawable == newPhoto.drawable }
             }
-            .takeWhile { this._imagesSubject.value?.size ?: 0 < 9 }
-            .debounce(250L, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+            .debounce(TIMEOUT_PHOTO, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
             .subscribe { newPhoto ->
                 this.addPhoto(newPhoto)
+
+                this._collageStatus.postValue(
+                    if (this._imagesSubject.value?.size ?: 0 == MAX_PHOTOS)
+                        CollageStatus.FULL_FULLED
+                    else
+                        CollageStatus.NOT_FULL
+                )
             }
             .addTo(this._disposables)
 

@@ -12,6 +12,9 @@ import kotlin.math.sqrt
  */
 object ImageTools {
 
+    /**
+     * Creates a [Bitmap] that is grid of images
+     */
     fun combineImages(bitmaps: List<Bitmap>): Bitmap? {
         val cs: Bitmap?
 
