@@ -1,6 +1,15 @@
 # Combinestagram
 
-**Goal**: Create an application allowing to do several collage of images. Its name is **Combinestagram**.
+**Goal**: Create an application allowing to do several collage of images.
+
+
+## Phone display
+<p align="middle">
+     <img src="./screenshots/record.gif" width="30%" height="30%">
+</p>
+<p align="middle">
+     <img src="./screenshots/phone_1.png" width="30%" height="30%"> <img src="./screenshots/phone_2.png" width="30%" height="30%"> <img src="./screenshots/phone_3.png" width="30%" height="30%">
+</p>
 
 
 ## Comments
